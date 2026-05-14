@@ -1,6 +1,6 @@
 # Proyecto-Final-Progra
 # Sistema de gestión y distribución de agua para comunidades rurales de Guatemala
-##Integrantes
+## Integrantes
 - [Nahomy Duarte]
 - [Adriana Flores]
 - [Josue Argeda]
