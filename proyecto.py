@@ -1,6 +1,31 @@
 from datetime import datetime
 import json
 
+# --- CLASE --- #
+class Distribucion:
+    def __init__(self, id, usuario, comunidad, litros, fecha):
+        self.id = id
+        self.usuario = usuario
+        self.comunidad = comunidad
+        self.litros = litros
+        self.fecha = fecha
+
+    def mostrar_resumen(self):
+        return (
+            f"ID:{self.id} | Operador:{self.usuario} | "
+            f"Comunidad:{self.comunidad} | Litros:{self.litros} | "
+            f"Fecha:{self.fecha}"
+        )
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "usuario": self.usuario,
+            "comunidad": self.comunidad,
+            "litros": self.litros,
+            "fecha": self.fecha
+        }
+
 # --- VARIABLES GENERALES --- #
 # Guardan el estados total del sistema.
 agua_recibida_total = 0
@@ -41,8 +66,8 @@ def guardar_datos():
         "historial_distribuciones": historial_distribuciones
     }
 
-    with open(ARCHIVO_DATOS, "w") as archivo:
-        json.dump(datos, archivo, indent=4)
+    with open(ARCHIVO_DATOS, "w", encoding="utf-8") as archivo:
+        json.dump(datos, archivo, indent=4, ensure_ascii=False)
 
 # --- CARGAR DATOS --- #
 def cargar_datos():
@@ -66,7 +91,17 @@ def cargar_datos():
             distribucion_por_comunidad = datos["distribucion_por_comunidad"]
             consumo_por_operador = datos["consumo_por_operador"]
 
-            historial_distribuciones = datos["historial_distribuciones"]
+            historial_distribuciones = []
+            for d in datos["historial_distribuciones"]:
+                historial_distribuciones.append(
+                    Distribucion(
+                        d["id"],
+                        d["usuario"],
+                        d["comunidad"],
+                        d["litros"],
+                        d["fecha"]
+                    )
+                )
 
     except FileNotFoundError:
         print("No existe archivo de datos. Se creará uno nuevo.\n")
@@ -197,13 +232,13 @@ def registrar_distribucion(usuario):
             consumo_por_operador[usuario] = litros
 
         # Crear registro de distribucion
-        distribucion = {
-            "id": len(historial_distribuciones) + 1,
-            "usuario": usuario,
-            "comunidad": comunidad,
-            "litros": litros,
-            "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
+        distribucion = Distribucion(
+            len(historial_distribuciones) + 1,
+            usuario,
+            comunidad,
+            litros,
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        )
 
         # Agregar registro al historial
         historial_distribuciones.append(distribucion)
@@ -289,11 +324,7 @@ def ver_historial():
         return
 
     for d in historial_distribuciones:
-        print(
-            f"ID:{d['id']} | Operador:{d['usuario']} | "
-            f"Comunidad:{d['comunidad']} | Litros:{d['litros']} | "
-            f"Fecha:{d['fecha']}"
-        )
+        print(d.mostrar_resumen())
     print("")
 
 # --- BUSQUEDA RECURSIVA ---
@@ -323,12 +354,7 @@ def borrar_registro():
         print("\nDistribuciones registradas:\n")
 
         for d in historial_distribuciones:
-            print(
-                f"ID:{d['id']} | Operador:{d['usuario']} | "
-                f"Comunidad:{d['comunidad']} | "
-                f"Litros:{d['litros']} | "
-                f"Fecha:{d['fecha']}"
-            )
+            print(d.mostrar_resumen())
 
         print("")
 
@@ -365,6 +391,10 @@ def borrar_registro():
 
         # Eliminar el registro del historial
         historial_distribuciones.remove(registro)
+
+        # Reordenar IDs para que queden consecutivos
+        for i, d in enumerate(historial_distribuciones, start=1):
+            d.id = i
 
         # Guardar los cambios en el archivo JSON
         guardar_datos()
