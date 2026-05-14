@@ -32,7 +32,7 @@ El sistema permite:
 - Consultar inventario disponible.
 - Generar reportes por comunidad.
 - Generar reportes por operador.
-- Ver hisotrial de distribuciones.
+- Ver historial de distribuciones.
 - Corregir registros erróneos.
 - Guardar automáticamente la información en archivos JSON.
 
@@ -161,7 +161,7 @@ def consultar_inventario():
 ```
 
 # Conclusión
-Este proyecto permite mejorar el control y la organización de la distribución de agua en comunidades rurales mediante un sistema desarrollado en Python. Además de resolver un problema real, el proyecto aplica conceptos fundamentales de programació, como funciones, estructuras de control, manejo de archivos JSON y manejo de errores.
+Este proyecto permite mejorar el control y la organización de la distribución de agua en comunidades rurales mediante un sistema desarrollado en Python. Además de resolver un problema real, el proyecto aplica conceptos fundamentales de programación, como funciones, estructuras de control, manejo de archivos JSON y manejo de errores.
 
 
 
