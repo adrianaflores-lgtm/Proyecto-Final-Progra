@@ -268,3 +268,44 @@ while True:
 
         else:
             print("opcion invalida")
+
+# --- REPORTES DE COMUNIDADES ---
+# ¿Que comunidad ha recibido más agua?
+def reporte_comunidades():
+    print("\n=== REPORTE DE AGUA POR COMUNIDAD ===")
+
+    if not distribucion_por_comunidad:
+        print("No hay distribuciones registradas\n")
+        return
+
+    for comunidad, litros in distribucion_por_comunidad.items():
+        print(f"{comunidad}: {litros} litros recibidos")
+    print("")
+
+# --- REPORTE DE OPERADORES ---
+# ¿Quien fue el responsable de distribuir el agua?
+def reporte_operadores():
+    print("\n=== REPORTE DE AGUA POR OPERADOR ===")
+
+    if not consumo_por_operador:
+        print("No hay registros de distribución por operador\n")
+        return
+
+    for operador, litros in consumo_por_operador.items():
+        print(f"{operador}: {litros} litros distribuidos")
+    print("")
+
+# --- TOTAL DE REPORTE ---
+def total_acumulado():
+    print("\n=== TOTAL ACUMULADO ===")
+    print(f"Total de agua recibida: {agua_recibida_total} litros")
+    print(f"Total de agua distribuida: {agua_distribuida_total} litros")
+    print(f"Agua disponible actualmente: {stock_agua} litros")
+
+    if agua_recibida_total > 0:
+        porcentaje_distribuido = (agua_distribuida_total / agua_recibida_total) * 100
+        print(f"Porcentaje de agua distribuida: {porcentaje_distribuido:.2f}%")
+    else:
+        print("Todavía no se ha registrado ingreso de agua")
+
+    print("")
