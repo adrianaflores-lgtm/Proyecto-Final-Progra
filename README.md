@@ -1,9 +1,9 @@
 # Proyecto-Final-Progra
 # Sistema de gestión y distribución de agua para comunidades rurales de Guatemala
 ## Integrantes
-- [Nahomy Duarte]
-- [Adriana Flores]
-- [Josue Argeda]
+- Nahomy Duarte
+- Adriana Flores
+- Josue Argeda
 
 Curso: Fundamentos de Programación - Sección C
 Universidad Francisco Marroquín
