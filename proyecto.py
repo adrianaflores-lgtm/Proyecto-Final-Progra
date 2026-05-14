@@ -1,12 +1,14 @@
 from datetime import datetime
 
 # --- VARIABLES GENERALES --- #
+# Guardan el estados total del sistema.
 agua_recibida_total = 0
 agua_distribuida_total = 0
 stock_agua = 0
 
 # --- COMUNIDADES DEL SISTEMA --- #
 # Agregar esta lista al codigo final basandonos en el departamento de chiquimula.
+# Lista de comunidades que pueden recibir agua
 comunidades = [
     "Jocotán",
     "Camotán",
@@ -20,9 +22,12 @@ distribucion_por_comunidad = {}
 consumo_por_operador = {}
 
 # --- HISTORIAL --- #
+# Guarda cada entrega con ID, operador, comunidad, litros y fecha.
 historial_distribuciones = []
 
 # --- LOGIN --- #
+# Verifica ususario y contraseña.
+# Dependiendo de las credenciales se asigna un rol.
 def login():
     print("=== SISTEMA DE GESTION DE AGUA ===")
     
@@ -41,21 +46,24 @@ def login():
     elif usuario == "invitado" and contrasena == "0000":
         print("Acceso invitado\n")
         return "invitado"
+    # Si las credenciales son incorrectas
     else:
         print("Acceso denegado\n")
         return None
 
 # --- INGRESO DE AGUA --- #
+# registra agua, actualiza inventario, suma el total recibido.
 def ingresar_agua():
     global agua_recibida_total, stock_agua
     
     try:
         cantidad = int(input("Total de litros recibidos: "))
         
+        # valida cantidad mayor 0
          if cantidad <= 0:
             print("Debe ser mayor que 0\n")
             return
-        # Se cambio las fuentes para ser mas especiificos.
+        # Mostrar fuentes disponibles de ingreso.
         print("\nFuentes de ingreso:")
         print("1. Camión cisterna")
         print("2. Pozo comunitario")
@@ -64,6 +72,7 @@ def ingresar_agua():
 
         fuente = input("Seleccione la fuente de agua: ")
 
+        # convertir la opcion elegida en nombre de fuente
         if fuente == "1":
             nombre_fuente = "Camión cisterna"
         elif fuente == "2":
@@ -75,10 +84,12 @@ def ingresar_agua():
         else:
             print("Fuente inválida\n")
             return
-            
+
+        # Actualizar cantidades del sistema
         agua_recibida_total += cantidad
         stock_agua += cantidad
 
+        # Mostrar resumen del ingreso registrado
         print("\n=== INGRESO REGISTRADO ===")
         print(f"Fuente: {nombre_fuente}")
         print(f"Litros recibidos: {cantidad}")
@@ -89,9 +100,11 @@ def ingresar_agua():
 
 # --- DISTRIBUCION DEL AGUA --- #
 # Se encarga de la entrega de agua a las comunidades.
+# Actualiza inventario, guarda estadisticas, registra historial.
 def registrar_distribucion(usuario):
     global agua_distribuida_total, stock_agua
 
+    # Mostrar comunidades disponibles
     print("\nComunidades disponibles:")
     for i, comunidad in enumerate(comunidades, start=1):
         print(f"{i}. {comunidad}")
@@ -99,6 +112,7 @@ def registrar_distribucion(usuario):
     try:
         opcion = int(input("Seleccione la comunidad: "))
 
+        # Validar que la comunidad exista
         if opcion < 1 or opcion > len(comunidades):
             print("Comunidad inválida\n")
             return
@@ -107,28 +121,34 @@ def registrar_distribucion(usuario):
 
         litros = int(input("Litros a distribuir: "))
 
+        # Validar cantidad positiva
         if litros <= 0:
             print("Cantidad inválida\n")
             return
 
+        # Verificar que exista suficiente agua
         if litros > stock_agua:
             print("No hay suficiente agua disponible")
             print(f"Disponible: {stock_agua} litros\n")
             return
-
+        
+        # Actualizar inventario
         stock_agua -= litros
         agua_distribuida_total += litros
 
+        # Guardar litros entregados por comunidad
         if comunidad in distribucion_por_comunidad:
             distribucion_por_comunidad[comunidad] += litros
         else:
             distribucion_por_comunidad[comunidad] = litros
 
+        # Guardad litros distribuidos por operados
         if usuario in consumo_por_operador:
             consumo_por_operador[usuario] += litros
         else:
             consumo_por_operador[usuario] = litros
 
+        # Crear registro de distribucion
         distribucion = {
             "id": len(historial_distribuciones) + 1,
             "usuario": usuario,
@@ -137,8 +157,10 @@ def registrar_distribucion(usuario):
             "fecha": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
 
+        # Agregar registro al historial
         historial_distribuciones.append(distribucion)
 
+        # Mostrar resumen de la distribucion
         print("\n=== DISTRIBUCIÓN REGISTRADA ===")
         print(f"Comunidad: {comunidad}")
         print(f"Litros distribuidos: {litros}")
@@ -149,13 +171,14 @@ def registrar_distribucion(usuario):
         print("Ingrese un número válido\n")
 
 # --- INVENTARIO --- #
+# Muestra el estado actual del agua
 def consultar_inventario():
     print("\n=== INVENTARIO DE AGUA ===")
     print(f"Agua recibida total: {agua_recibida_total} litros")
     print(f"Agua distribuida total: {agua_distribuida_total} litros")
     print(f"Agua disponible: {stock_agua} litros\n")
 
-    #Alerta de bajo stock.
+    #Mostrar alertas segun nivel de agua disponible.
     if stock_agua == 0:
         print("Estado: SIN AGUA DISPONIBLE")
     elif stock_agua < 500:
