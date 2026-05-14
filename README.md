@@ -15,11 +15,11 @@ Universidad Francisco Marroquín
 Este proyecto consiste en un sistema desarrollado en Python para la gestión y distribución de agua en comunidades rurales de Gautemala afectadas por escasez hídrica, especialmente en zonas del correcor seco como Chiquimula, Jocotán, Camotán y Olopa.
 
 En muchas comunidades rurales, la distribución de agua se realiza manualmente, sin controles digitales claros sobre: 
-- cuánta agua se recibe,
-- cuánto se distribuye,
-- qué comunidades reciben más agua,
-- quién realiza las entregas,
-- y cuánto recurso queda disponible
+- Cuánta agua se recibe
+- Cuánto se distribuye.
+- Qué comunidades reciben más agua.
+- Quién realiza las entregas.
+- Cuántos recurso queda disponible.
 
 Este proyecto consiste en un sistema desarrollado en Python que permite registrar el ingreso y distribución de agua en comunidades rurales, controlar el inventario disponible y generar reportes básicos.
 
