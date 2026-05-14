@@ -56,14 +56,13 @@ ARCHIVO_DATOS = "datos_agua.json"
 
 # --- GUARDAR DATOS --- #
 def guardar_datos():
-
     datos = {
         "agua_recibida_total": agua_recibida_total,
         "agua_distribuida_total": agua_distribuida_total,
         "stock_agua": stock_agua,
         "distribucion_por_comunidad": distribucion_por_comunidad,
         "consumo_por_operador": consumo_por_operador,
-        "historial_distribuciones": historial_distribuciones
+        "historial_distribuciones": [d.to_dict() for d in historial_distribuciones]
     }
 
     with open(ARCHIVO_DATOS, "w", encoding="utf-8") as archivo:
@@ -71,7 +70,6 @@ def guardar_datos():
 
 # --- CARGAR DATOS --- #
 def cargar_datos():
-
     global agua_recibida_total
     global agua_distribuida_total
     global stock_agua
@@ -80,19 +78,18 @@ def cargar_datos():
     global historial_distribuciones
 
     try:
-        with open(ARCHIVO_DATOS, "r") as archivo:
-
+        with open(ARCHIVO_DATOS, "r", encoding="utf-8") as archivo:
             datos = json.load(archivo)
 
-            agua_recibida_total = datos["agua_recibida_total"]
-            agua_distribuida_total = datos["agua_distribuida_total"]
-            stock_agua = datos["stock_agua"]
+            agua_recibida_total = datos.get("agua_recibida_total", 0)
+            agua_distribuida_total = datos.get("agua_distribuida_total", 0)
+            stock_agua = datos.get("stock_agua", 0)
 
-            distribucion_por_comunidad = datos["distribucion_por_comunidad"]
-            consumo_por_operador = datos["consumo_por_operador"]
+            distribucion_por_comunidad = datos.get("distribucion_por_comunidad", {})
+            consumo_por_operador = datos.get("consumo_por_operador", {})
 
             historial_distribuciones = []
-            for d in datos["historial_distribuciones"]:
+            for d in datos.get("historial_distribuciones", []):
                 historial_distribuciones.append(
                     Distribucion(
                         d["id"],
@@ -105,6 +102,15 @@ def cargar_datos():
 
     except FileNotFoundError:
         print("No existe archivo de datos. Se creará uno nuevo.\n")
+
+    except json.JSONDecodeError:
+        print("El archivo JSON está dañado. Se iniciará con datos vacíos.\n")
+        agua_recibida_total = 0
+        agua_distribuida_total = 0
+        stock_agua = 0
+        distribucion_por_comunidad = {}
+        consumo_por_operador = {}
+        historial_distribuciones = []
 
 # --- LOGIN --- #
 # Verifica ususario y contraseña.
@@ -330,11 +336,10 @@ def ver_historial():
 # --- BUSQUEDA RECURSIVA ---
 #Busca un registro dentro del historial usando el ID
 def buscar_registro_recursivo(historial, id_buscar, indice=0):
-    #caso base
     if indice >= len(historial):
         return None
 
-    if historial[indice]["id"] == id_buscar:
+    if historial[indice].id == id_buscar:
         return historial[indice]
 
     return buscar_registro_recursivo(historial, id_buscar, indice + 1)
@@ -370,24 +375,23 @@ def borrar_registro():
             return
 
         # Devolver los litros al inventario
-        stock_agua += registro["litros"]
+        stock_agua += registro.litros
 
         # Restar los litros del total distribuido
-        agua_distribuida_total -= registro["litros"]
-
+        agua_distribuida_total -= registro.litros
         # Restar los litros del reporte por comunidad
-        distribucion_por_comunidad[registro["comunidad"]] -= registro["litros"]
+        distribucion_por_comunidad[registro.comunidad] -= registro.litros
 
         # Si la comunidad queda con 0 litros, se elimina del diccionario
-        if distribucion_por_comunidad[registro["comunidad"]] <= 0:
-            del distribucion_por_comunidad[registro["comunidad"]]
+        if distribucion_por_comunidad[registro.comunidad] <= 0:
+            del distribucion_por_comunidad[registro.comunidad]
 
         # Restar los litros del reporte por operador
-        consumo_por_operador[registro["usuario"]] -= registro["litros"]
+        consumo_por_operador[registro.usuario] -= registro.litros
 
         # Si el operador queda con 0 litros, se elimina del diccionario
-        if consumo_por_operador[registro["usuario"]] <= 0:
-            del consumo_por_operador[registro["usuario"]]
+        if consumo_por_operador[registro.usuario] <= 0:
+            del consumo_por_operador[registro.usuario]
 
         # Eliminar el registro del historial
         historial_distribuciones.remove(registro)
@@ -400,7 +404,7 @@ def borrar_registro():
         guardar_datos()
 
         print("\nRegistro corregido correctamente")
-        print(f"Se devolvieron {registro['litros']} litros al inventario")
+        print(f"Se devolvieron {registro.litros} litros al inventario")
         print(f"Agua disponible actual: {stock_agua} litros\n")
 
     except ValueError:
