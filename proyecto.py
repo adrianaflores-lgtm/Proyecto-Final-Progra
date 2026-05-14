@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 
 # --- VARIABLES GENERALES --- #
 # Guardan el estados total del sistema.
@@ -24,6 +25,51 @@ consumo_por_operador = {}
 # --- HISTORIAL --- #
 # Guarda cada entrega con ID, operador, comunidad, litros y fecha.
 historial_distribuciones = []
+
+# --- ARCHIVO JSON --- #
+ARCHIVO_DATOS = "datos_agua.json"
+
+# --- GUARDAR DATOS --- #
+def guardar_datos():
+
+    datos = {
+        "agua_recibida_total": agua_recibida_total,
+        "agua_distribuida_total": agua_distribuida_total,
+        "stock_agua": stock_agua,
+        "distribucion_por_comunidad": distribucion_por_comunidad,
+        "consumo_por_operador": consumo_por_operador,
+        "historial_distribuciones": historial_distribuciones
+    }
+
+    with open(ARCHIVO_DATOS, "w") as archivo:
+        json.dump(datos, archivo, indent=4)
+
+# --- CARGAR DATOS --- #
+def cargar_datos():
+
+    global agua_recibida_total
+    global agua_distribuida_total
+    global stock_agua
+    global distribucion_por_comunidad
+    global consumo_por_operador
+    global historial_distribuciones
+
+    try:
+        with open(ARCHIVO_DATOS, "r") as archivo:
+
+            datos = json.load(archivo)
+
+            agua_recibida_total = datos["agua_recibida_total"]
+            agua_distribuida_total = datos["agua_distribuida_total"]
+            stock_agua = datos["stock_agua"]
+
+            distribucion_por_comunidad = datos["distribucion_por_comunidad"]
+            consumo_por_operador = datos["consumo_por_operador"]
+
+            historial_distribuciones = datos["historial_distribuciones"]
+
+    except FileNotFoundError:
+        print("No existe archivo de datos. Se creará uno nuevo.\n")
 
 # --- LOGIN --- #
 # Verifica ususario y contraseña.
@@ -88,6 +134,8 @@ def ingresar_agua():
         # Actualizar cantidades del sistema
         agua_recibida_total += cantidad
         stock_agua += cantidad
+
+        guardar_datos()
 
         # Mostrar resumen del ingreso registrado
         print("\n=== INGRESO REGISTRADO ===")
@@ -159,6 +207,8 @@ def registrar_distribucion(usuario):
 
         # Agregar registro al historial
         historial_distribuciones.append(distribucion)
+
+        guardar_datos()
 
         # Mostrar resumen de la distribucion
         print("\n=== DISTRIBUCIÓN REGISTRADA ===")
@@ -291,6 +341,8 @@ def borrar_registro():
 
                 historial_distribuciones.remove(d)
 
+                guardar_datos()
+
                 print("\nRegistro corregido correctamente")
                 print(f"Se devolvieron {d['litros']} litros al inventario")
                 print(f"Agua disponible actual: {stock_agua} litros\n")
@@ -300,6 +352,9 @@ def borrar_registro():
 
     except ValueError:
         print("Dato inválido\n")
+        
+#Cargar los datos guardados
+cargar_datos()
 
 # --- LOOP PRINCIPAL ---
 while True:
