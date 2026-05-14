@@ -106,7 +106,7 @@ def ingresar_agua():
         cantidad = int(input("Total de litros recibidos: "))
         
         # valida cantidad mayor 0
-         if cantidad <= 0:
+        if cantidad <= 0:
             print("Debe ser mayor que 0\n")
             return
         # Mostrar fuentes disponibles de ingreso.
