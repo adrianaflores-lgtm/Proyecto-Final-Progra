@@ -1,3 +1,4 @@
+###Etapa 1
 from datetime import datetime
 
 # sistema agua
@@ -89,6 +90,8 @@ def inventario():
     print("agua total:", agua)
     print("agua usada:", usada)
     print("stock:", stock)
+
+##Etapa 2
 
 def reporte():
     print("\nREPORTE COMUNIDADES")
