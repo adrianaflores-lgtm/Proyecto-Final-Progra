@@ -296,6 +296,18 @@ def ver_historial():
         )
     print("")
 
+# --- BUSQUEDA RECURSIVA ---
+#Busca un registro dentro del historial usando el ID
+def buscar_registro_recursivo(historial, id_buscar, indice=0):
+    #caso base
+    if indice >= len(historial):
+        return None
+
+    if historial[indice]["id"] == id_buscar:
+        return historial[indice]
+
+    return buscar_registro_recursivo(historial, id_buscar, indice + 1)
+
 # --- CORREGIR REGISTRO DE DISTRIBUCION ---
 def borrar_registro():
     global agua_distribuida_total, stock_agua
@@ -321,37 +333,48 @@ def borrar_registro():
         print("")
 
         #Pedir ID
-        id_buscar = int(input("ID a eliminar: "))
+        id_buscar = int(input("ID a corregir: "))
 
-        for d in historial_distribuciones:
-            if d["id"] == id_buscar:
-                # Revertir inventario
-                stock_agua += d["litros"]
-                agua_distribuida_total -= d["litros"]
+        #Buscar el registro usando recursividad
+        registro = buscar_registro_recursivo(historial_distribuciones, id_buscar)
 
-                # Revertir comunidad
-                distribucion_por_comunidad[d["comunidad"]] -= d["litros"]
-                if distribucion_por_comunidad[d["comunidad"]] <= 0:
-                    del distribucion_por_comunidad[d["comunidad"]]
+        #si no se encuentra el registro
+        if registro is None:
+            print("No se encontró un registro con ese ID\n")
+            return
 
-                # Revertir operador
-                consumo_por_operador[d["usuario"]] -= d["litros"]
-                if consumo_por_operador[d["usuario"]] <= 0:
-                    del consumo_por_operador[d["usuario"]]
+        # Devolver los litros al inventario
+        stock_agua += registro["litros"]
 
-                historial_distribuciones.remove(d)
+        # Restar los litros del total distribuido
+        agua_distribuida_total -= registro["litros"]
 
-                guardar_datos()
+        # Restar los litros del reporte por comunidad
+        distribucion_por_comunidad[registro["comunidad"]] -= registro["litros"]
 
-                print("\nRegistro corregido correctamente")
-                print(f"Se devolvieron {d['litros']} litros al inventario")
-                print(f"Agua disponible actual: {stock_agua} litros\n")
-                return
+        # Si la comunidad queda con 0 litros, se elimina del diccionario
+        if distribucion_por_comunidad[registro["comunidad"]] <= 0:
+            del distribucion_por_comunidad[registro["comunidad"]]
 
-        print("ID no encontrado\n")
+        # Restar los litros del reporte por operador
+        consumo_por_operador[registro["usuario"]] -= registro["litros"]
+
+        # Si el operador queda con 0 litros, se elimina del diccionario
+        if consumo_por_operador[registro["usuario"]] <= 0:
+            del consumo_por_operador[registro["usuario"]]
+
+        # Eliminar el registro del historial
+        historial_distribuciones.remove(registro)
+
+        # Guardar los cambios en el archivo JSON
+        guardar_datos()
+
+        print("\nRegistro corregido correctamente")
+        print(f"Se devolvieron {registro['litros']} litros al inventario")
+        print(f"Agua disponible actual: {stock_agua} litros\n")
 
     except ValueError:
-        print("Dato inválido\n")
+        print("Debe ingresar un número válido\n")
         
 #Cargar los datos guardados
 cargar_datos()
