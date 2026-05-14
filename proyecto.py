@@ -228,3 +228,139 @@ def total_acumulado():
         print("Todavía no se ha registrado ingreso de agua")
 
     print("")
+
+# --- HISTORIAL ---
+# que operador distribuyó agua, a qué comunidad, cuántos litros entregó y en qué fecha.
+def ver_historial():
+    print("\n=== HISTORIAL DE DISTRIBUCIONES ===")
+
+    if not historial_distribuciones:
+        print("No hay distribuciones registradas\n")
+        return
+
+    for d in historial_distribuciones:
+        print(
+            f"ID:{d['id']} | Operador:{d['usuario']} | "
+            f"Comunidad:{d['comunidad']} | Litros:{d['litros']} | "
+            f"Fecha:{d['fecha']}"
+        )
+    print("")
+
+# --- CORREGIR REGISTRO DE DISTRIBUCION ---
+def borrar_registro():
+    global agua_distribuida_total, stock_agua
+
+    print("\n=== CORRECCIÓN REGISTRO DE DISTRIBUCIÓN ===")
+
+    if not historial_distribuciones:
+        print("No hay registros para corregir\n")
+        return
+
+    try:
+        # Mostrar historial antes de borrar
+        print("\nDistribuciones registradas:\n")
+
+        for d in historial_distribuciones:
+            print(
+                f"ID:{d['id']} | Operador:{d['usuario']} | "
+                f"Comunidad:{d['comunidad']} | "
+                f"Litros:{d['litros']} | "
+                f"Fecha:{d['fecha']}"
+            )
+
+        print("")
+
+        #Pedir ID
+        id_buscar = int(input("ID a eliminar: "))
+
+        for d in historial_distribuciones:
+            if d["id"] == id_buscar:
+                # Revertir inventario
+                stock_agua += d["litros"]
+                agua_distribuida_total -= d["litros"]
+
+                # Revertir comunidad
+                distribucion_por_comunidad[d["comunidad"]] -= d["litros"]
+                if distribucion_por_comunidad[d["comunidad"]] <= 0:
+                    del distribucion_por_comunidad[d["comunidad"]]
+
+                # Revertir operador
+                consumo_por_operador[d["usuario"]] -= d["litros"]
+                if consumo_por_operador[d["usuario"]] <= 0:
+                    del consumo_por_operador[d["usuario"]]
+
+                historial_distribuciones.remove(d)
+
+                print("\nRegistro corregido correctamente")
+                print(f"Se devolvieron {d['litros']} litros al inventario")
+                print(f"Agua disponible actual: {stock_agua} litros\n")
+                return
+
+        print("ID no encontrado\n")
+
+    except ValueError:
+        print("Dato inválido\n")
+
+# --- LOOP PRINCIPAL ---
+while True:
+    rol = login()
+
+    if not rol:
+        continue
+
+    while True:
+        print("=== MENÚ PRINCIPAL ===")
+        print("1. Ingreso de agua")
+        print("2. Distribución de agua")
+        print("3. Inventario")
+
+        if rol in ["admin", "operador1", "operador2"]:
+            print("4. Reporte de agua por comunidad")
+
+        if rol == "admin":
+            print("5. Reporte de agua por operador")
+            print("6. Total acumulado")
+            print("7. Historial de distribución")
+            print("8. Corregir registro")
+            print("9. Salir")
+        else:
+            print("9. Salir")
+
+        op = input("Opción: ")
+
+        if op == "1":
+            if rol == "invitado":
+                print("No tiene permiso para ingresar agua\n")
+            else:
+                ingresar_agua()
+
+        elif op == "2":
+            if rol == "invitado":
+                print("No tiene permiso para distribuir agua\n")
+            else:
+                registrar_distribucion(rol)
+
+        elif op == "3":
+            consultar_inventario()
+
+        elif op == "4" and rol in ["admin", "operador1", "operador2"]:
+            reporte_comunidades()
+
+        elif op == "5" and rol == "admin":
+            reporte_operadores()
+
+        elif op == "6" and rol == "admin":
+            total_acumulado()
+
+        elif op == "7" and rol == "admin":
+            ver_historial()
+
+        elif op == "8" and rol == "admin":
+            borrar_registro()
+
+        elif op == "9":
+            print("Cerrando sesión...\n")
+            break
+
+        else:
+            print("Opción inválida\n")
